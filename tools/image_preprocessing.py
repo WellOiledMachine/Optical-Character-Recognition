@@ -12,10 +12,28 @@ from skimage import io
 from skimage.transform import rotate
 from deskew import determine_skew
 
-def clean_image(image_path, crop=True):
-    # Read in the image as grayscale
-    gray = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+def clean_image(image):
+    """
+    Parameters
+    ----------
+    image : str
+        The path to the image file to clean.
     
+    Returns
+    -------
+    thresh : numpy array
+        The cleaned image.
+    
+    Description
+    -----------
+    This function cleans an image by deskewing it, applying a bilateral filter to reduce noise, and applying an adaptive
+    gaussian threshold to get a binary image. The input image is expected to use the RGB color space rather than cv2's
+    default BGR color space.
+    """
+    # Convert the image to grayscale from RGB
+    gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    
+    # Deskew the image
     rotated, _ = deskew(gray)
     
     # Apply bilateral filter to the image to reduce noise
@@ -26,6 +44,24 @@ def clean_image(image_path, crop=True):
                 cv2.THRESH_BINARY,11,2)
     
     return thresh
+
+# Old cleaning function, This seemed to work really well on some images, but completely ruined other images.
+# def clean_image(image):
+#     # Convert the image to grayscale
+#     image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+
+#     # Deskew the image
+#     rotated, _ = deskew(image)
+
+#     # Apply Otsu's thresholding method to get a binary image
+#     image = cv2.threshold(rotated, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+
+#     # Dilate the image
+#     kernel = np.ones((2,2), np.uint8)
+#     image = cv2.dilate(image, kernel, iterations = 1)
+
+#     return image
+
 
 def clean_image_dir(directory, output_path):
     """

@@ -2,6 +2,21 @@
 # Project: Optical Character Recognition
 # This script contains functions to modify and filter tabular data extracted from tesseract.
 
+
+# Index positions for each element in a row
+# level= 0
+# pagenum = 1
+# block_num = 2
+# par_num = 3
+# line_num = 4
+# word_num = 5
+# left = 6
+# top = 7
+# width = 8
+# height = 9
+# conf = 10
+# text = 11
+
 def filter_low_conf_extraction(data, conf_threshold = 10):
     """
     Parameters

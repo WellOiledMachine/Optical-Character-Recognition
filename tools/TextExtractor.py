@@ -295,7 +295,7 @@ class TextExtractor:
         images = self.convert_file_to_images(file_name)
         if images is None:
             print(f"Could not extract text from {file_name}.")
-            return
+            return None
         
         for i, image in enumerate(images):
             # Extract text or data from the image
@@ -368,14 +368,14 @@ class TextExtractor:
         be done using the TextExtractor class object, not this function.
         """
         start_time = time.time()
-        
+
         self.api.SetVariable('tessedit_char_blacklist', '|{}()><\\')
         for file_name in input_list:
             # Convert the file to into a list of images (could be multiple pages if PDF)
             images = self.convert_file_to_images(file_name)
             if images is None:
                 print(f"Could not extract text from {file_name}.")
-                return
+                continue
 
             # Loop through each image
             for i, image in enumerate(images):
@@ -411,6 +411,6 @@ class TextExtractor:
                     with open(save_path, 'w') as f:
                         f.write(text)
 
-        print("Time taken: ", time.time() - start_time)
+        print(f"Time taken: {time.time() - start_time:.2f} seconds")
 
 

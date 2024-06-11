@@ -4,14 +4,15 @@ from PIL import Image
 from tools.image_preprocessing import clean_image
 
 if __name__ == '__main__':
-
-    print(tesserocr.tesseract_version())
-
-    image_path = 'test_images/preface.jpg'
+    # Set up the paths to the files
+    image_path = 'test_images/SampleText.jpg'
     pdf_John = 'example-forms/emergency-medical-form.pdf'
     pdf_Alex = 'example-forms/emergency-medical-form-example.pdf'
+
     # using a text file just to test if the code will catch invalid file types and handle them correctly
+    # this file shouldn't exist
     txt_path = 'output_text/example-forms/emergency-medical-form.pdf.txt'
+
 
     filenames = [pdf_Alex, pdf_John, image_path, txt_path]
 

@@ -2,6 +2,9 @@ import tesserocr
 from tools.TextExtractor import TextExtractor
 from PIL import Image
 from tools.image_preprocessing import clean_image
+import os
+# Set the path to the tesseract data directory
+os.environ['TESSDATA_PREFIX'] = '/usr/share/tesseract-ocr/5/tessdata'
 
 if __name__ == '__main__':
     # Set up the paths to the files
@@ -11,7 +14,7 @@ if __name__ == '__main__':
 
     # using a text file just to test if the code will catch invalid file types and handle them correctly
     # this file shouldn't exist
-    txt_path = 'output_text/example-forms/emergency-medical-form.pdf.txt'
+    txt_path = 'emergency-medical-form.txt'
 
 
     filenames = [pdf_Alex, pdf_John, image_path, txt_path]

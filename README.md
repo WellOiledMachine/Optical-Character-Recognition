@@ -29,7 +29,6 @@ An example file [example_text_extraction](example_text_extraction.py) has been p
 A basic text extraction file would look something like this:
 ```py
 import tesserocr
-import cv2
 from tools.TextExtractor import TextExtractor
 from tools.image_preprocessing import clean_image
 

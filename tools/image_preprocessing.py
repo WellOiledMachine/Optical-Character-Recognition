@@ -8,59 +8,136 @@ import cv2
 import os
 from argparse import ArgumentParser
 import matplotlib.pyplot as plt
-from skimage import io
 from skimage.transform import rotate
 from deskew import determine_skew
 
-def clean_image(image):
+class ImagePreprocessor:
     """
-    Parameters
-    ----------
-    image : str
-        The path to the image file to clean.
-    
-    Returns
-    -------
-    thresh : numpy array
-        The cleaned image.
-    
-    Description
-    -----------
-    This function cleans an image by deskewing it, applying a bilateral filter to reduce noise, and applying an adaptive
-    gaussian threshold to get a binary image. The input image is expected to use the RGB color space rather than cv2's
-    default BGR color space.
+    This class provides a place to configure every OCR relevant image preprocessing step to be applied to an image.
+    The class is callable, so it can be used as a function to apply the preprocessing steps to an image. The class is 
+    set up to have defaults for each preprocessing step, so it will apply very basic preprocessing steps. Every
+    preprocessing step is uses OpenCV functions, except for the deskew function, which uses the deskew library.
+    It is not advised to apply too many preprocessing steps to an image, as many of the steps are not meant to be combined.
+    First initialize the class with the desired preprocessing steps, then call the class with an image to apply those
+    preprocessing steps to the image.
+    Those who wish to configure the parameters are assumed to understand cv2 image processing methods and how to use
+    them.
     """
-    # Convert the image to grayscale from RGB
-    gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    def __init__(
+                self,
+                grayscale = cv2.COLOR_BGR2GRAY,
+                normalize: bool = True,
+                normalize_args: dict = {"alpha": 0, "beta": 255, "norm_type": cv2.NORM_MINMAX},
+                sharpen: bool = False,
+                deskew: bool = True,
+                denoise: bool = True,
+                denoise_args: dict = {"h": 10, "templateWindowSize": 7, "searchWindowSize": 21},
+                bilateral_filter: bool = False,
+                bilateral_filter_args: dict = {"d": 9, "sigmaColor": 75, "sigmaSpace": 75},
+                global_binarize: bool = False,
+                global_binarize_args: dict = {"threshold": 127, "maxval": 255, "type": cv2.THRESH_BINARY},
+                gaussian_blur: bool = False,
+                gaussian_blur_args: dict = {"ksize": (5, 5), "sigmaX": 0},
+                otsu_threshold: bool = False,
+                otsu_threshold_args: dict = {"threshold": 0, "maxval": 255},
+                adaptive_gaussian_threshold: bool = False,
+                adaptive_mean_threshold: bool = False,
+                adaptive_threshold_args: dict = {"maxval": 255, "blockSize": 11, "C": 2},
+                erode: bool = False,
+                erosion_args: dict = {"kernel_size": (1,1), "iterations": 1},
+                dilate: bool = False,
+                dilation_args: dict = {"kernel_size": (1,1), "iterations": 1},
+                morphology: bool = False,
+                morphology_args: dict = {"kernel_size": (1,1), "op": cv2.MORPH_OPEN}
+                ):
+        self.grayscale = grayscale
+        self.normalize = normalize
+        self.normalize_args = normalize_args
+        self.sharpen = sharpen
+        self.deskew = deskew
+        self.denoise = denoise
+        self.denoise_args = denoise_args
+        self.bilateral_filter = bilateral_filter
+        self.bilateral_filter_args = bilateral_filter_args
+        self.global_binarize = global_binarize
+        self.global_binarize_args = global_binarize_args
+        self.gaussian_blur = gaussian_blur
+        self.gaussian_blur_args = gaussian_blur_args
+        self.otsu_threshold = otsu_threshold
+        self.otsu_threshold_args = otsu_threshold_args
+        self.adaptive_mean_threshold = adaptive_mean_threshold
+        self.adaptive_gaussian_threshold = adaptive_gaussian_threshold
+        self.adaptive_threshold_args = adaptive_threshold_args
+        self.erode = erode
+        self.erosion_args = erosion_args
+        self.dilate = dilate
+        self.dilation_args = dilation_args
+        self.morphology = morphology
+        self.morphology_args = morphology_args
+        
+    def __call__(self, image):
+        if self.grayscale is not None:
+            image = cv2.cvtColor(image, self.grayscale)
+        
+        if self.normalize:
+            image = cv2.normalize(image, None, **self.normalize_args)
+
+        if self.sharpen:
+            kernel = np.array([[-1, -1, -1],
+                                [-1, 9, -1],
+                                [-1, -1, -1]])
+            cv2.filter2D(image, -1, kernel)
+
+        if self.deskew:
+            # Determine the angle of rotation needed to deskew the image
+            angle = determine_skew(image)
     
-    # Deskew the image
-    rotated, _ = deskew(gray)
-    
-    # Apply bilateral filter to the image to reduce noise
-    bi_filter = cv2.bilateralFilter(rotated,9,75,75)
-    
-    # Apply adaptive gaussian threshold to the image to get a binary image
-    thresh = cv2.adaptiveThreshold(bi_filter,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
-                cv2.THRESH_BINARY,11,2)
-    
-    return thresh
+            # Apply the rotation to the image, and convert it back to a uint8 image
+            image = (rotate(image, angle, resize=True, cval=1)*255).astype(np.uint8)
+        
+        if self.denoise:
+            image = cv2.fastNlMeansDenoising(image, None, **self.denoise_args)
 
-# Old cleaning function, This seemed to work really well on some images, but completely ruined other images.
-# def clean_image(image):
-#     # Convert the image to grayscale
-#     image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        if self.bilateral_filter:
+            image = cv2.bilateralFilter(image, **self.bilateral_filter_args)
+        
+        if self.global_binarize:
+            args = self.global_binarize_args
+            image = cv2.threshold(image, args.threshold, args.maxval, cv2.THRESH_BINARY)[1]
 
-#     # Deskew the image
-#     rotated, _ = deskew(image)
+        if self.gaussian_blur:
+            image = cv2.GaussianBlur(image, **self.gaussian_blur_args)
+        
+        if self.otsu_threshold:
+            args = self.otsu_threshold_args
+            image = cv2.threshold(image, args.threshold, args.maxval, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+        
+        if self.adaptive_mean_threshold:
+            args = self.adaptive_threshold_args
+            image = cv2.adaptiveThreshold(image, args.maxval, cv2.ADAPTIVE_THRESH_MEAN_C, 
+                                          cv2.THRESH_BINARY,args.blockSize, args.C)
+            
+        if self.adaptive_gaussian_threshold:
+            args = self.adaptive_threshold_args
+            image = cv2.adaptiveThreshold(image, args.maxval, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+                                          cv2.THRESH_BINARY,args.blockSize, args.C)
+        
+        if self.erode:
+            kernel_size = self.erosion_args.kernel_size
+            kernel = np.ones(kernel_size, np.uint8)
+            image = cv2.erode(image, kernel, iterations=self.erosion_args.iterations)
+        
+        if self.dilate:
+            kernel_size = self.erosion_args.kernel_size
+            kernel = np.ones(kernel_size, np.uint8)
+            image = cv2.dilate(image, kernel, iterations=self.erosion_args.iterations)
+        
+        if self.morphology:
+            kernel_size = self.morphology_args.kernel_size
+            kernel = np.ones(kernel_size, np.uint8)
+            image = cv2.morphologyEx(image, self.morphology_args.op, kernel)
 
-#     # Apply Otsu's thresholding method to get a binary image
-#     image = cv2.threshold(rotated, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
-
-#     # Dilate the image
-#     kernel = np.ones((2,2), np.uint8)
-#     image = cv2.dilate(image, kernel, iterations = 1)
-
-#     return image
+        return image
 
 
 def clean_image_dir(directory, output_path):
@@ -105,7 +182,11 @@ def clean_image_dir(directory, output_path):
         
         # Clean and save the image to the output directory
         input_path = os.path.join(directory, image_name)
-        cleaned_image = clean_image(input_path)
+
+        # Read the image
+        image = cv2.imread(input_path, cv2.IMREAD_GRAYSCALE)
+        clean_image = ImagePreprocessor(grayscale=None) # Initialize the ImagePreprocessor and turn off grayscaling
+        cleaned_image = clean_image(image)
         
         # Give the cleaned image the same name as the original image with '_cleaned' added to the end
         new_name = os.path.splitext(image_name)[0] + '_cleaned' + os.path.splitext(image_name)[1]
@@ -114,33 +195,6 @@ def clean_image_dir(directory, output_path):
         cv2.imwrite(output_file, cleaned_image)
     
     print('Images cleaned and saved to ' + output_path)
-
-
-def deskew(image):
-    """
-    Parameters
-    ----------
-    image : numpy array
-        The image to deskew.
-        
-    Returns
-    -------
-    rotated : numpy array
-        The deskewed image.
-    angle : float
-        The angle of rotation applied to deskew the image.
-        
-    Description
-    -----------
-    This function deskews an image by rotating it to align text with the horizontal axis. 
-    """
-    # Determine the angle of rotation needed to deskew the image    
-    angle = determine_skew(image)
-    
-    # Apply the rotation to the image, and convert it back to a uint8 image
-    rotated = (rotate(image, angle, resize=True, cval=1)*255).astype(np.uint8)
-    
-    return rotated, angle
     
 
 if __name__ == "__main__":
@@ -156,10 +210,11 @@ if __name__ == "__main__":
     
     # Clean either a single image and display it, or clean a directory of images and save them to a new directory
     if args.image:
-        cleaned_image = clean_image(args.image)
+        image = cv2.imread(args.image, cv2.IMREAD_GRAYSCALE)
+        clean_image = ImagePreprocessor(grayscale=None) # Initialize the ImagePreprocessor and turn off grayscaling
+        cleaned_image = clean_image(image)
         plt.imshow(cleaned_image, cmap='gray')
         plt.show()
     elif args.directory:
         clean_image_dir(args.directory, args.output)
-        print('Images cleaned and saved to ' + args.output)
     

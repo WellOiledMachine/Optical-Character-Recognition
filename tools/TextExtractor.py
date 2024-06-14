@@ -12,37 +12,12 @@ import numpy as np
 import os
 
 
-
 class TextExtractor:
-    """
-    Parameters
-    ----------
-    api : tesserocr.PyTessBaseAPI
-        The tesserocr API object to use to extract text from images.
-    seg_func : function, optional
-        The function to segment the image into smaller images. The default is None, which means no segmentation will
-        be done. This function must return a list of images (or a tuple or something similar).
-    seg_func_args : dict, optional
-        Dictionary of arguments that maps each key and value of the arguements that need to be passed to the 
-        segmentation function. If your segmentation function does not require any arguments, then leave this parameter alone. 
-        The default is an empty dict.
-        If your segmentation function requires arguments, then you must provide them in a dict in the form of 
-        {arg1: value1, arg2: value2, ...}
-    clean_image_func : function, optional
-        The function to clean the image before extracting text. The default is None, which means the image will not be
-        cleaned. This function must return
-    clean_image_func_args : dict, optional
-        Dictionary of arguments that maps each key and value of the arguements that need to be passed to the 
-        cleaning function. If your cleaning function does not require any arguments, then leave this parameter alone. 
-        The default is an empty dict.
-        If your cleaning function requires arguments, then you must provide them in a dict in the form of 
-        {arg1: value1, arg2: value2, ...}
-    
-    This class is used to extract text from images and PDFs using the tesserocr library. The class provides functions
-    to extract text from images and PDFs, as well as functions to extract word-specific data from the images. The class
-    requires being initialized with a tesserocr.PyTessBaseAPI object to use the tesserocr library to extract text. This
-    means that objects of this class will only be able to work when it has an opened tesserocr API object attached.
-    """
+    """This class is used to extract text from images and PDFs using the tesserocr library. The class provides 
+    functions to extract text from images and PDFs, as well as functions to extract word-specific data from the images.
+    The class requires being initialized with a tesserocr.PyTessBaseAPI object to use the tesserocr library to extract
+    text. This means that objects of this class will only be able to work when it has an opened tesserocr API object 
+    attached."""
     def __init__(
             self,
             api, 
@@ -51,6 +26,30 @@ class TextExtractor:
             clean_image_func=None,
             clean_image_func_args={}
         ):
+        """
+        Parameters
+        ----------
+        api : tesserocr.PyTessBaseAPI
+            The tesserocr API object to use to extract text from images.
+        seg_func : function, optional
+            The function to segment the image into smaller images. The default is None, which means no segmentation will
+            be done. This function must return a list of images (or a tuple or something similar).
+        seg_func_args : dict, optional
+            Dictionary of arguments that maps each key and value of the arguements that need to be passed to the 
+            segmentation function. If your segmentation function does not require any arguments, then leave this parameter alone. 
+            The default is an empty dict.
+            If your segmentation function requires arguments, then you must provide them in a dict in the form of 
+            {arg1: value1, arg2: value2, ...}
+        clean_image_func : function, optional
+            The function to clean the image before extracting text. The default is None, which means the image will not be
+            cleaned. This function must return
+        clean_image_func_args : dict, optional
+            Dictionary of arguments that maps each key and value of the arguements that need to be passed to the 
+            cleaning function. If your cleaning function does not require any arguments, then leave this parameter alone. 
+            The default is an empty dict.
+            If your cleaning function requires arguments, then you must provide them in a dict in the form of 
+            {arg1: value1, arg2: value2, ...}
+        """
 
         self.api = api
         self.seg_func = seg_func
@@ -110,19 +109,17 @@ class TextExtractor:
             images = convert_from_path(file_name, 300)
             # Convert the images from PIL to OpenCV for the cleaning function
             if not use_PIL_data_type:
-                images = [np.array(image) for image in images]
+                images = [np.array(image.convert('L')) for image in images]
                     
         # Check if the file is an image
         elif file_name.lower().endswith(tuple(self.img_file_type)):
             if use_PIL_data_type:
                 # Read the image using PIL
-                image = Image.open(file_name)
+                image = Image.open(file_name).convert('L')
                 images = [image]
             else:
-            # Read the image using OpenCV
-                image = cv2.imread(file_name)
-                # Convert the image to use RGB color space, since this is what the cleaning function expects
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                # Read the image using OpenCV
+                image = cv2.imread(file_name, cv2.IMREAD_GRAYSCALE)
                 # This function expects a list of images, so need to convert the image to a list of itself.
                 images = [image]
         
@@ -135,7 +132,7 @@ class TextExtractor:
             for i in range(image.n_frames):
                 image.seek(i)
                 if use_PIL_data_type:
-                    images.append(image)
+                    images.append(image.convert('L'))
                 else:
                     images.append(np.array(image))
 
@@ -170,7 +167,7 @@ class TextExtractor:
 
         text = ''
         for segment in segments:
-            image = Image.fromarray(segment)
+            image = Image.fromarray(segment) if not isinstance(segment, Image.Image) else segment
             self.api.SetImage(image)
             text += self.api.GetUTF8Text()
 
@@ -369,7 +366,7 @@ class TextExtractor:
         """
         start_time = time.time()
 
-        self.api.SetVariable('tessedit_char_blacklist', '|{}()><\\')
+        
         for file_name in input_list:
             # Convert the file to into a list of images (could be multiple pages if PDF)
             images = self.convert_file_to_images(file_name)
@@ -413,4 +410,4 @@ class TextExtractor:
 
         print(f"Time taken: {time.time() - start_time:.2f} seconds")
 
-
+    

@@ -10,6 +10,10 @@ Will contain tools to effectively and efficiently read text from files and parse
 - **Customizable Text Parsing:** *Currently in development*. 
 
 ## Installation
+**AT THE MOMENT, ONLY LINUX OPERATING SYSTEMS CAN RUN THIS REPOSITORY.**  
+*The default tesseract installation version seems to vary based on the OS being used. This toolkit uses tesseract version 5, which is the default installation for Linux. We are still working on testing fixing this toolkit to run on Windows or MacOS operating systems.*
+
+### Linux
 First, install the repository and the package requirements using:
 ```bash
 git clone https://github.com/WellOiledMachine/Optical-Character-Recognition.git

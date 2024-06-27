@@ -83,7 +83,7 @@ Detailed explanations of the commands can be found below:
 **Usage**: `python tools/TextExtractor.py [-h] (-d DIRECTORY | -f FILE) [-o OUTPUT] [--print] [--get_data]`
 
 | flag  | option | explanation |
-| --- | --- | --- |
+| ------ | -------------- | --- |
 | -h | --help | If set, show the help message that explains these options and exit |  
 | -d <path> | --directory <path> | Path to the directory containing the images or PDFs to extract text from. Mutually exclusive with --file. |  
 | -f <path> | --file <path> | Path to the image or PDF file. Mutually exclusive with --directory.|  
@@ -97,7 +97,7 @@ From the root folder of the repository, use command `python tools/ImageProcessor
 **Usage**: `python tools/ImageProcessor.py [-h] (--image IMAGE | --directory DIRECTORY) [--output OUTPUT]`
 
 | flag  | option | explanation |
-| --- | --- | --- |
+| ------ | ------------- | --- |
 | -h | --help | If set, show the help message that explains these options and exit |  
 | -i <path> | --image <path> | Path to the image file. Mutually exclusive with --directory. |
 | -d <path> | --directory <path> | Path to the directory of images. Mutually exclusive with --image. |

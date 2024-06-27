@@ -85,9 +85,9 @@ Detailed explanations of the commands can be found below:
 | flag  | option | explanation |
 | ------ | -------------- | --- |
 | -h | --help | If set, show the help message that explains these options and exit |  
-| -d <path> | --directory <path> | Path to the directory containing the images or PDFs to extract text from. Mutually exclusive with --file. |  
-| -f <path> | --file <path> | Path to the image or PDF file. Mutually exclusive with --directory.|  
-| -o <path> | --output <path> | Path to the directory to save the extracted text files to |  
+| -d \<path\> | --directory \<path\> | Path to the directory containing the images or PDFs to extract text from. Mutually exclusive with --file. |  
+| -f \<path\> | --file \<path\> | Path to the image or PDF file. Mutually exclusive with --directory.|  
+| -o \<path\> | --output \<path\> | Path to the directory to save the extracted text files to |  
 | N/A | --print | If set, will print the extracted text to the console. True by default if --output not set. |  
 | N/A | --get_data | If set, will extract word-specific data from the images |  
 
@@ -99,9 +99,9 @@ From the root folder of the repository, use command `python tools/ImageProcessor
 | flag  | option | explanation |
 | ------ | ------------- | --- |
 | -h | --help | If set, show the help message that explains these options and exit |  
-| -i <path> | --image <path> | Path to the image file. Mutually exclusive with --directory. |
-| -d <path> | --directory <path> | Path to the directory of images. Mutually exclusive with --image. |
-| -o <path> | --output <path> | Path to the output directory. Processed images will be output with a '_annotated' appended to the title. |
+| -i | --image \<path\> | Path to the image file. Mutually exclusive with --directory. |
+| -d \<path\> | --directory \<path\> | Path to the directory of images. Mutually exclusive with --image. |
+| -o \<path\> | --output \<path\> | Path to the output directory. Processed images will be output with a '_annotated' appended to the title. |
 
 **Example**: `python tools/ImageProcessor.py -i test_images/SampleText.jpg -o output_folder` will process a single image and output it to the folder `output_folder`.
 

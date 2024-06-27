@@ -418,16 +418,12 @@ if __name__ == "__main__":
     group.add_argument('-d', '--directory', help='Path to the directory containing the images or PDFs to extract text from')
     group.add_argument('-f', '--file', help='Path to the image or PDF file')
     parser.add_argument('-o', '--output', help='Path to the directory to save the extracted text files to')
-    parser.add_argument('--print', action='store_true', help='Print the extracted text to the console')
-    parser.add_argument('--get_data', action='store_true', help='Extract word-specific data from the images')
+    parser.add_argument('--print', action='store_true', help='If set, will print the extracted text to the console')
+    parser.add_argument('--get_data', action='store_true', help='If set, will extract word-specific data from the images')
     args = parser.parse_args()
 
-    if not args.output and args.directory:
-        print("No output or print arguments provided. No text will be extracted.")
-        exit(1)
-
     # Print if neither print or output is set
-    print_text = True if not args.print and not args.output else args.print
+    print_text = True if not args.output else args.print
 
     # Import this here because it is the only place it is used
     from ImageProcessor import ImageProcessor

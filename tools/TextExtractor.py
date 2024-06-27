@@ -64,9 +64,8 @@ class TextExtractor:
             raise ValueError("API must be a tesserocr.PyTessBaseAPI object.")
 
         if clean_image_func is None:
-            # If no cleaning function is provided, default to converting the image to grayscale
-            print("No cleaning function provided. Defaulting to only converting the image to grayscale.\n")
-            self.clean_image_func = lambda image: cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+            print("No image cleaning function provided.\n")
+            self.clean_image_func = lambda image: image
             self.clean_image_func_args = {}
 
         if seg_func is None:
@@ -134,7 +133,7 @@ class TextExtractor:
                 if use_PIL_data_type:
                     images.append(image.convert('L'))
                 else:
-                    images.append(np.array(image))
+                    images.append(np.array(image.convert('L')))
 
         else:
             print(f"File {file_name} is not a PDF or image file.")
@@ -251,13 +250,13 @@ class TextExtractor:
         return text
 
 
-    def extract_from_file(self, file_name, output_name=None, print_results=False, get_data=False, psm=PSM.AUTO):
+    def extract_from_file(self, file_path, output_path=None, print_results=False, get_data=False, psm=PSM.AUTO):
         """
         Parameters
         ----------
-        file_name : str
+        file_path : str
             The path to the image or PDF file to extract text from.
-        output_name : str, optional
+        output_path : str, optional
             The path to save the extracted text to. The default is None (no text file will be saved).
         print_results : bool, optional
             Whether to print the extracted text to the console. The default is False.
@@ -279,19 +278,19 @@ class TextExtractor:
         -----------
         This function extracts text from an image or PDF file. The text is extracted using the tesseract API through
         the tesserocr library. The extracted text can either be printed to the console or saved to a text file in the
-        output_name path.
+        output_path.
 
         If get_data is True, then word-specific data will be extracted from the images. This data includes the text,
         confidence, and coordinate data of each word in the image. This is what is printed to the console or saved to
         the text file.
 
-        If neither the print_results or output_name parameters are set, then the text will be extracted but not 
+        If neither the print_results or output_path parameters are set, then the text will be extracted but not 
         outputted (Effectively using system resources to do nothing). This function does not return any data, so it
         cannot be used to store the extracted text in a variable.
         """
-        images = self.convert_file_to_images(file_name)
+        images = self.convert_file_to_images(file_path)
         if images is None:
-            print(f"Could not extract text from {file_name}.")
+            print(f"Could not extract text from {file_path}.")
             return None
         
         for i, image in enumerate(images):
@@ -299,7 +298,7 @@ class TextExtractor:
             if get_data:
                 # Extract the text and coordinate data from the image
                 data = self.get_coordinate_data(image, psm)
-                if output_name or print_results:
+                if output_path or print_results:
                     # Convert the returned data to text, and add a header to the text
                     text = 'left\ttop\tright\tbottom\tconf\ttext\n' + self.convert_coord_data_to_text(data)
             else:
@@ -310,16 +309,16 @@ class TextExtractor:
             if print_results:
                 print(text)
 
-            # Save the extracted text to text file if output_name is provided
-            if output_name:
-                os.makedirs(os.path.dirname(output_name), exist_ok=True)
+            # Save the extracted text to text file if output_path is provided
+            if output_path:
+                os.makedirs(os.path.dirname(output_path), exist_ok=True)
                 # If there are multiple images, add a number to the output name
                 if len(images) > 1:
-                    name, ext = os.path.splitext(output_name)
-                    new_output_name = name + f'_{i}' + ext
+                    name, ext = os.path.splitext(output_path)
+                    new_output_path = name + f'_{i}' + ext
                 else:
-                    new_output_name = output_name
-                with open(new_output_name, 'w') as f:
+                    new_output_path = output_path
+                with open(new_output_path, 'w') as f:
                     f.write(text)
 
         return data if get_data else text
@@ -410,4 +409,63 @@ class TextExtractor:
 
         print(f"Time taken: {time.time() - start_time:.2f} seconds")
 
-    
+
+if __name__ == "__main__":
+    from argparse import ArgumentParser
+    # Parse the arguments
+    parser = ArgumentParser()
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('-d', '--directory', help='Path to the directory containing the images or PDFs to extract text from')
+    group.add_argument('-f', '--file', help='Path to the image or PDF file')
+    parser.add_argument('-o', '--output', help='Path to the directory to save the extracted text files to')
+    parser.add_argument('--print', action='store_true', help='Print the extracted text to the console')
+    parser.add_argument('--get_data', action='store_true', help='Extract word-specific data from the images')
+    args = parser.parse_args()
+
+    if not args.output and args.directory:
+        print("No output or print arguments provided. No text will be extracted.")
+        exit(1)
+
+    # Print if neither print or output is set
+    print_text = True if not args.print and not args.output else args.print
+
+    # Import this here because it is the only place it is used
+    from ImageProcessor import ImageProcessor
+    clean_image_func = ImageProcessor() # Use the default ImageProcessor class to clean the images
+
+
+    # Define the accepted file types
+    accepted_file_types = ('.png', '.jpg', '.jpeg', '.jpe', '.webp', '.bmp', '.webp', '.dib', '.pxm', '.pgm',
+                            '.pbm', '.pnm', '.pdf')
+
+    # Need to initialize the API to extract text with the TextExtractor class
+    with tesserocr.PyTessBaseAPI() as api:
+        api.SetVariable("debug_file", "/dev/null")
+        api.SetVariable('tessedit_char_blacklist', '|{}()><\\©')
+
+        text_extractor = TextExtractor(api, clean_image_func=clean_image_func)
+
+        if args.file:
+            if not os.path.exists(args.file) and not args.file.lower().endswith(accepted_file_types):
+                print(f"Invalid file: {args.file}")
+                exit(1)
+
+            # Extract text from the file
+            text_extractor.extract_from_file(args.file, output_path=args.output, print_results=print_text,
+                                             get_data=args.get_data)
+        elif args.directory:
+            if not os.path.isdir(args.directory):
+                print(f"Invalid directory: {args.directory}")
+                exit(1)
+
+            # Get the list of image/pdf files in the directory
+            file_list = []
+            for file in os.listdir(args.directory):
+                if file.lower().endswith(accepted_file_types):
+                    file_path = os.path.join(args.directory, file)
+                    file_list.append(file_path)
+
+            # Extract text from the list of files
+            text_extractor.extract_from_list(file_list, output_dir=args.output, print_results=print_text,
+                                             get_data=args.get_data)
+            

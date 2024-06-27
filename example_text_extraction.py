@@ -1,7 +1,7 @@
 import tesserocr
 from tools.TextExtractor import TextExtractor
 from tools.ImageCropper import ImageCropper
-from tools.image_preprocessing import ImagePreprocessor
+from tools.ImageProcessor import ImageProcessor
 import os
 import cv2
 
@@ -28,15 +28,15 @@ if __name__ == '__main__':
         api.SetVariable("debug_file", "/dev/null")
         api.SetVariable('tessedit_char_blacklist', '|{}()><\\©')
 
-        # Initialize the ImagePreprocessor
-        clean_image = ImagePreprocessor(grayscale=None)
+        # Initialize the ImageProcessor
+        clean_image_func = ImageProcessor()
 
-        text_extractor = TextExtractor(api, clean_image_func=clean_image)
+        text_extractor = TextExtractor(api, clean_image_func=clean_image_func)
 
         """1) Let's try just extracting text from all of the files in the list. Can also set get_data=True to get coordinate data.
         You can also specify an output directory to save the extracted .txt files to."""
         # You may want to comment the line below when you are done testing.
-        text = text_extractor.extract_from_list(filenames, output_dir=None, print_results=True, get_data=False)
+        # text = text_extractor.extract_from_list(filenames, output_dir=None, print_results=True, get_data=False)
 
 
         """2) You can also extract text from a single image
@@ -72,9 +72,9 @@ if __name__ == '__main__':
         accuracy."""
         # UNCOMMENT THE LINES BELOW
         
-        # # Read in the image
+        # Read in the image
         # image = text_extractor.convert_file_to_images(pdf_John)[0]
-        # clean_img = clean_image(image)
+        # clean_img = clean_image_func(image)
         #
         # cropper = ImageCropper()
         # # This is going to grab a lot of segments, and some may just have gibberish. Also, sometimes text is duplicated

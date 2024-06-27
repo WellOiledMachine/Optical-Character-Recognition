@@ -1,0 +1,16 @@
+name: text_extraction
+channels:
+  - defaults
+dependencies:
+  - python==3.8.12
+  - conda-forge::pip
+  - conda-forge::tesseract
+  - conda-forge::numpy
+  - conda-forge::opencv
+  - conda-forge::pdf2image
+  - conda-forge::scikit-image
+  - conda-forge::matplotlib
+  - conda-forge::pillow
+  - conda-forge::tesserocr
+  - pip:
+    - deskew

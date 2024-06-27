@@ -1,16 +1,18 @@
 name: text_extraction
 channels:
+  - conda-forge
   - defaults
 dependencies:
-  - python==3.8.12
-  - conda-forge::pip
-  - conda-forge::tesseract
-  - conda-forge::numpy
-  - conda-forge::opencv
-  - conda-forge::pdf2image
-  - conda-forge::scikit-image
-  - conda-forge::matplotlib
-  - conda-forge::pillow
-  - conda-forge::tesserocr
+  - python==3.10
+  - pip
+  - opencv
+  - tesseract
+  - numpy
+  - pdf2image
+  - scikit-image
+  - matplotlib
+  - pillow
+  - tesserocr
+  - libarchive
   - pip:
     - deskew

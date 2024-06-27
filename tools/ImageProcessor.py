@@ -7,7 +7,6 @@ import numpy as np
 import cv2
 import os
 from argparse import ArgumentParser
-import matplotlib.pyplot as plt
 from skimage.transform import rotate
 from deskew import determine_skew
 
@@ -201,20 +200,21 @@ if __name__ == "__main__":
     # Parse the arguments
     parser = ArgumentParser()
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('--image', help='Path to the image file')
-    group.add_argument('--directory', help='Path to the directory of images')
-    
-    parser.add_argument('--output', help='Path to the output directory')
-    
+    group.add_argument('-i', '--image', help='Path to the image file')
+    group.add_argument('-d', '--directory', help='Path to the directory of images')
+    parser.add_argument('-o', '--output', help='Path to the output directory', required=True)
     args = parser.parse_args()
+
     
     # Clean either a single image and display it, or clean a directory of images and save them to a new directory
     if args.image:
         image = cv2.imread(args.image, cv2.IMREAD_GRAYSCALE)
         clean_image = ImageProcessor() # Initialize the ImageProcessor and turn off grayscaling
         cleaned_image = clean_image(image)
-        plt.imshow(cleaned_image, cmap='gray')
-        plt.show()
+        
+        print(args.output, args.image)
+        cv2.imwrite(args.output, cleaned_image)
+
     elif args.directory:
         clean_image_dir(args.directory, args.output)
     

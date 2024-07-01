@@ -32,8 +32,9 @@ You may now continue to the `Run application` section. Make sure you continue to
 ---
 
 ### Linux / WSL on Windows
-**Step 1**: Install Miniconda for your linux distribution by following the instructions [here](https://docs.anaconda.com/miniconda/).
+**Step 1**: Install Miniconda for your linux distribution by following the instructions [here](https://docs.anaconda.com/miniconda/).  
 - Make sure conda is installed correctly. Use `conda -V` and make sure conda prints its version.
+
 **Step 2**: Download the repository. Navigate to the desired directory and run these commands:
 ```bash
 git clone https://github.com/WellOiledMachine/Optical-Character-Recognition.git
@@ -92,6 +93,9 @@ Detailed explanations of the commands can be found below:
 | N/A | --get_data | If set, will extract word-specific data from the images |  
 
 **Example**: `python tools/TextExtractor.py -d example_forms -o output_folder --get_data` will extract all of the text and its coordinate information from the pdf and image files in the example_forms folder and outputs that information to the provided output directory.
+
+---
+
 #### Image Processing
 From the root folder of the repository, use command `python tools/ImageProcessor.py` to use the ImageProcessor class to process image files and clean them.  
 **Usage**: `python tools/ImageProcessor.py [-h] (--image IMAGE | --directory DIRECTORY) [--output OUTPUT]`
@@ -106,10 +110,10 @@ From the root folder of the repository, use command `python tools/ImageProcessor
 **Example**: `python tools/ImageProcessor.py -i test_images/SampleText.jpg -o output_folder` will process a single image and output it to the folder `output_folder`.
 
 
-### Creating a custom text extraction file
+### Creating a custom text extraction script
 An example file [example_text_extraction](example_text_extraction.py) has been provided to show how different methods in the TextExtractor class work.
 
-A basic text extraction file would look something like this:
+A basic text extraction script would look something like this:
 
 ```py
 import tesserocr
@@ -124,3 +128,4 @@ with tesserocr.PyTessBaseAPI() as api:
     text_extractor.extract_from_file(image_path, print_results=True)
 ```
 
+Then, you would run the script using `python text_extraction_script.py`.

@@ -5,35 +5,32 @@ A collection of utilities designed for automating the extraction of text from im
 Will contain tools to effectively and efficiently read text from files and parse through that text to find important data.
 
 ## Features
-- **Image Preprocessing:** Includes built in image quality improvement methods to ensure that OCR extraction is as accurate as possible.
+- **Image Processing:** Includes built in customizable image quality improvement functionality to ensure that OCR extraction is as accurate as possible.
 - **Customizable Text Extraction:** Simply provide images or pdf documents to extract text from images using the tesseract engine. You can easily provide your own custom functions for preprocessing the images, or use the built-in ones. You can also create custom functions to grab segments of the images and extract the text from those segments.
 - **Customizable Text Parsing:** *Currently in development*. 
 
 ## Installation
 ### Windows
-**Step 1**: Install the [Miniconda](https://docs.anaconda.com/miniconda/miniconda-install/) Conda Installer  
-
-**Step 2**: Download the repository. In the Anaconda Prompt shell, navigate to the desired direcory, then copy and paste these commands and press enter:
+**Step 1**: Install the [Miniconda Conda Installer](https://docs.anaconda.com/miniconda/miniconda-install/).  
+- You will need to open one of the new Anaconda Prompt (miniconda3) shell applications for the next steps. You may need to restart your computer after installing miniconda to find this shell
+  
+**Step 2**: Download the repository. In the Anaconda Prompt shell, navigate to the desired directory, then paste these commands and press enter:
 ```bash
 git clone https://github.com/WellOiledMachine/Optical-Character-Recognition.git
 cd Optical-Character-Recognition
 ```
-- You will need to open one of the new Anaconda Prompt (miniconda3) shell applications for the next steps
-   - You may need to restart your computer after installing miniconda to find this shell
  
 **Step 3**: Create the conda environment.  
-To make sure you are not currently in an environment, and then create a new one using our configuration file, run these commands in the Anaconda shell:
 ```bash
-conda deactivate
 conda env create --file environment.yaml -y
 ```
-You may now continue to the `Run application` section. Make sure you continue to use the Anaconda Prompt Shell for each step.
+You may now continue to the `Getting Started` section. Make sure you continue to use the Anaconda Prompt Shell for each step.
 
 ---
 
 ### Linux / WSL on Windows
-**Step 1**: Install Miniconda for your linux distribution by following the instructions [here](https://docs.anaconda.com/miniconda/).  
-- Make sure conda is installed correctly. Use `conda -V` and make sure conda prints its version.
+**Step 1**: Install [Miniconda](https://docs.anaconda.com/miniconda/) for your linux distribution.
+- Make sure conda is installed and set up correctly. Use `conda -V` and check that Conda's version number is returned. If Conda's version number is NOT shown in your shell after using this command, please make sure Miniconda is installed correctly and try again.
 
 **Step 2**: Download the repository. Navigate to the desired directory and run these commands:
 ```bash
@@ -42,41 +39,24 @@ cd Optical-Character-Recognition
 ```
 **Step 3**: Create the conda environment:
 ```bash
-conda deactivate
 conda env create --file environment.yaml -y
 ```
 
-Extra packages may need to be downloaded for Ubuntu / WSL + Ubuntu systems that conda can not provide. It is recommended to run these commands, especially if you run into errors:
+It was noted that extra packages may need to be downloaded with Ubuntu / WSL + Ubuntu systems:
 ```bash
 sudo apt-get update && sudo apt-get upgrade -y
 sudo apt-get install libglapi-mesa libegl-mesa0 libegl1 libopengl0 libgl1-mesa-glx -y
 ```
-You may now continue to the `Run application` section.
-
-### Run application
-
----
-
-Make sure your conda environment is installed using the command `conda activate text_extraction`, then you should be able to run code in this repository:
-```bash
-conda activate text_extraction
-python example_text_extraction.py
-```
-
-### Uninstallation
-
----
-
-If you would like to uninstall the repository, you can just delete the Optical-Character-Recognition folder.  
-If you would like to delete the conda environment created to run the repository, run these commands:
-```bash
-conda deactivate
-conda remove --name text_extraction --all
-```
-
-Refer to [this link](https://docs.anaconda.com/anaconda/install/uninstall/) if you wish to uninstall conda.
+You may now continue to the `Getting Started` section.
 
 ## Getting Started
+Make sure your conda environment is activated, then you should be able to run code in this repository:
+```bash
+conda deactivate
+conda activate text_extraction
+```
+From here, you can run any python text extraction scripts: `python example_text_extraction.py`,  
+or use the provided commands described below.
 ### Command Line Usage
 This repository contains the functionality to do simple text extractions on pdf and photo files using the command line. It also contains functionality to perform simple image processing from the command line.  
 Detailed explanations of the commands can be found below:
@@ -129,3 +109,18 @@ with tesserocr.PyTessBaseAPI() as api:
 ```
 
 Then, you would run the script using `python text_extraction_script.py`.
+
+---
+
+### Uninstallation
+
+---
+
+If you would like to uninstall the repository, you can just delete the Optical-Character-Recognition folder.  
+If you would like to delete the conda environment created to run the repository, run these commands:
+```bash
+conda deactivate
+conda remove --name text_extraction --all
+```
+
+Refer to [this link](https://docs.anaconda.com/anaconda/install/uninstall/) if you wish to uninstall conda.

@@ -120,7 +120,7 @@ If you would like to uninstall the repository, you can just delete the Optical-C
 If you would like to delete the conda environment created to run the repository, run these commands:
 ```bash
 conda deactivate
-conda remove --name text_extraction --all
+conda remove --name text_extraction --all -y
 ```
 
 Refer to [this link](https://docs.anaconda.com/anaconda/install/uninstall/) if you wish to uninstall conda.

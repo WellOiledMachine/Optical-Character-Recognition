@@ -5,6 +5,7 @@
 
 from tesserocr import RIL, PSM, iterate_level
 from PIL import Image
+import numpy as np
 
 class ImageCropper():
     """
@@ -25,34 +26,9 @@ class ImageCropper():
     def __init__(self):
         self.segment_coordinates = []
 
-    def __call__(self, image):
-        """
-        Parameters
-        ----------
-        image : numpy.ndarray
-            The image to segment into smaller images. Must be a grayscaled numpy.ndarray object.
-            Should already be preprocessed before being passed to this function.
+    def __call__(self, image: Image.Image):
+        return self.crop(image.convert('L'))
 
-        Returns
-        -------
-        segments : list<PIL.Image.Image>
-            A list of images that have been segmented from the original image.
-
-        Description
-        -----------
-        Takes a cleaned numpy array image and grabs specified cropped portions of the image to then be returned in 
-        a list. The images will be cropped based on the coordinates provided to the add_segment(), and
-        add_multiple_segments(), as well as the coordinates retrieved fromget_tess_auto_segments().
-        Useful for extracting text from specific areas of an image, improving the accuracy of the text extraction.
-        """
-        image = Image.fromarray(image)
-        segments = []
-        for coordinates in self.segment_coordinates:
-            # Crop the image based on the coordinates
-            segment = image.crop(coordinates)
-            segments.append(segment)
-        return segments
-    
     def add_segment(self, coordinates):
         """Takes a tuple or list of coordinates and adds them to the list of segment coordinates that will be used to
         cut the image into segments."""
@@ -62,7 +38,7 @@ class ImageCropper():
         """Takes a list of coordinates in the form of tuples or lists and adds them to the list of segment coordinates
         that will be used to cut the image into segments."""
         for coordinates in coordinates_list:
-            self.add_segment(coordinates)
+            self.add_segment(tuple(coordinates))
     
     def clear_segments(self):
         """Clears all the segment coordinates that have been added to the list of segment coordinates."""
@@ -115,5 +91,35 @@ class ImageCropper():
                 coordinates.append(bbox)
             
         self.add_multiple_segments(coordinates)
-        api.SetPageSegMode(PSM.AUTO)
+        api.SetPageSegMode(PSM.AUTO) # Reset the page segmentation mode
+
         return coordinates
+
+    def crop(self, image):
+        """
+        Parameters
+        ----------
+        image : PIL.Image.Image
+            The image to segment into smaller images. Must be a grayscaled PIL.Image object.
+            Should already be preprocessed before being passed to this function.
+
+        Returns
+        -------
+        segments : Dict[tuple, PIL.Image.Image]
+            A Dictionary of the cropped images mapped with their respective coordinates.
+
+        Description
+        -----------
+        Takes an input image and grabs specified cropped portions of the image to then be returned in 
+        a list. The images will be cropped based on the coordinates provided to the add_segment(), and
+        add_multiple_segments(), as well as the coordinates retrieved from get_tess_auto_segments().
+        Useful for extracting text from specific areas of an image, improving the accuracy of the text extraction.
+        """
+        segments = {}
+        for coordinates in self.segment_coordinates:
+            # Crop the image based on the coordinates
+            segment = image.crop(coordinates)
+            segments[coordinates] = segment
+        
+        return segments
+

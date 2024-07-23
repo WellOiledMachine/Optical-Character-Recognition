@@ -7,6 +7,7 @@ import numpy as np
 import cv2
 import os
 from argparse import ArgumentParser
+import matplotlib.pyplot as plt
 from skimage.transform import rotate
 from deskew import determine_skew
 
@@ -19,12 +20,11 @@ class ImageProcessor:
     It is not advised to apply too many preprocessing steps to an image, as many of the steps are not meant to be combined.
     First initialize the class with the desired preprocessing steps, then call the class with an image to apply those
     preprocessing steps to the image.
-    Those who wish to configure the parameters are assumed to understand cv2 image processing methods and how to use
-    them.
+    Those who wish to configure the parameters must understand cv2 image processing methods and how to use them.
     """
     def __init__(
                 self,
-                grayscale_conversion_type = None,
+                conversion = None,
                 normalize: bool = True,
                 normalize_args: dict = {"alpha": 0, "beta": 255, "norm_type": cv2.NORM_MINMAX},
                 sharpen: bool = False,
@@ -49,7 +49,7 @@ class ImageProcessor:
                 morphology: bool = False,
                 morphology_args: dict = {"kernel_size": (1,1), "op": cv2.MORPH_OPEN}
                 ):
-        self.grayscale_conversion_type = grayscale_conversion_type
+        self.conversion = conversion
         self.normalize = normalize
         self.normalize_args = normalize_args
         self.sharpen = sharpen
@@ -75,8 +75,8 @@ class ImageProcessor:
         self.morphology_args = morphology_args
         
     def __call__(self, image):
-        if self.grayscale_conversion_type is not None:
-            image = cv2.cvtColor(image, self.grayscale_conversion_type)
+        if self.conversion is not None:
+            image = cv2.cvtColor(image, self.conversion)
         
         if self.normalize:
             image = cv2.normalize(image, None, **self.normalize_args)
@@ -102,39 +102,39 @@ class ImageProcessor:
         
         if self.global_binarize:
             args = self.global_binarize_args
-            image = cv2.threshold(image, args.threshold, args.maxval, cv2.THRESH_BINARY)[1]
+            image = cv2.threshold(image, args['threshold'], args['maxval'], cv2.THRESH_BINARY)[1]
 
         if self.gaussian_blur:
             image = cv2.GaussianBlur(image, **self.gaussian_blur_args)
         
         if self.otsu_threshold:
             args = self.otsu_threshold_args
-            image = cv2.threshold(image, args.threshold, args.maxval, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+            image = cv2.threshold(image, args['threshold'], args['maxval'], cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
         
         if self.adaptive_mean_threshold:
             args = self.adaptive_threshold_args
-            image = cv2.adaptiveThreshold(image, args.maxval, cv2.ADAPTIVE_THRESH_MEAN_C, 
-                                          cv2.THRESH_BINARY,args.blockSize, args.C)
+            image = cv2.adaptiveThreshold(image, args['maxval'], cv2.ADAPTIVE_THRESH_MEAN_C, 
+                                          cv2.THRESH_BINARY, args['blockSize'], args['C'])
             
         if self.adaptive_gaussian_threshold:
             args = self.adaptive_threshold_args
-            image = cv2.adaptiveThreshold(image, args.maxval, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
-                                          cv2.THRESH_BINARY,args.blockSize, args.C)
+            image = cv2.adaptiveThreshold(image, args['maxval'], cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+                                          cv2.THRESH_BINARY, args['blockSize'], args['C'])
         
         if self.erode:
-            kernel_size = self.erosion_args.kernel_size
-            kernel = np.ones(kernel_size, np.uint8)
-            image = cv2.erode(image, kernel, iterations=self.erosion_args.iterations)
+            args = self.erosion_args
+            kernel = np.ones(args['kernel_size'], np.uint8)
+            image = cv2.erode(image, kernel, iterations=args['iterations'])
         
         if self.dilate:
-            kernel_size = self.erosion_args.kernel_size
-            kernel = np.ones(kernel_size, np.uint8)
-            image = cv2.dilate(image, kernel, iterations=self.erosion_args.iterations)
+            args = self.erosion_args
+            kernel = np.ones(args['kernel_size'], np.uint8)
+            image = cv2.dilate(image, kernel, iterations=args['iterations'])
         
         if self.morphology:
-            kernel_size = self.morphology_args.kernel_size
-            kernel = np.ones(kernel_size, np.uint8)
-            image = cv2.morphologyEx(image, self.morphology_args.op, kernel)
+            args = self.morphology_args
+            kernel = np.ones(args['kernel_size'], np.uint8)
+            image = cv2.morphologyEx(image, args['op'], kernel)
 
         return image
 
@@ -200,21 +200,20 @@ if __name__ == "__main__":
     # Parse the arguments
     parser = ArgumentParser()
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('-i', '--image', help='Path to the image file')
-    group.add_argument('-d', '--directory', help='Path to the directory of images')
-    parser.add_argument('-o', '--output', help='Path to the output directory', required=True)
+    group.add_argument('--image', help='Path to the image file')
+    group.add_argument('--directory', help='Path to the directory of images')
+    
+    parser.add_argument('--output', help='Path to the output directory')
+    
     args = parser.parse_args()
-
     
     # Clean either a single image and display it, or clean a directory of images and save them to a new directory
     if args.image:
         image = cv2.imread(args.image, cv2.IMREAD_GRAYSCALE)
         clean_image = ImageProcessor() # Initialize the ImageProcessor and turn off grayscaling
         cleaned_image = clean_image(image)
-        
-        print(args.output, args.image)
-        cv2.imwrite(args.output, cleaned_image)
-
+        plt.imshow(cleaned_image, cmap='gray')
+        plt.show()
     elif args.directory:
         clean_image_dir(args.directory, args.output)
     

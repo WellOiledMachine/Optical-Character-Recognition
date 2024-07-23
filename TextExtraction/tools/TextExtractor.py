@@ -6,11 +6,10 @@ import tesserocr
 from tesserocr import PSM
 from PIL import Image
 from pdf2image import convert_from_path
-import cv2
 import time
 import numpy as np
 import os
-
+import utils
 
 class TextExtractor:
     """This class is used to extract text from images and PDFs using the tesserocr library. The class provides 
@@ -56,90 +55,19 @@ class TextExtractor:
         self.seg_func_args = seg_func_args
         self.clean_image_func = clean_image_func
         self.clean_image_func_args = clean_image_func_args
-        self.img_file_type  = ['.png', '.jpg', '.jpeg', '.jpe', '.webp', '.bmp', '.webp', '.dib', '.pxm','.pgm',
-                               '.pbm', '.pnm']
         
         # Check if a proper API object was provided
         if not isinstance(api, tesserocr.PyTessBaseAPI):
             raise ValueError("API must be a tesserocr.PyTessBaseAPI object.")
 
         if clean_image_func is None:
-            print("No image cleaning function provided.\n")
             self.clean_image_func = lambda image: image
             self.clean_image_func_args = {}
 
         if seg_func is None:
             # If no segment function is provided, default to no segmentation
-            print("No segment function provided. Defaulting to no segmentation.\n")
             self.seg_func = lambda image: [image]
             self.seg_func_args = {}
-
-    def convert_file_to_images(self, file_name, use_PIL_data_type=False):
-        """
-        Parameters
-        ----------
-        file_name : str
-            The path to the image or PDF file to extract text from.
-        use_PIL_data_type : bool, optional
-            Whether to return the images in PIL.Image data type. The default is False, which uses the numpy.ndarray
-            data type. This is useful for cv2 cleaning functions, which will expect a numpy.ndarray data type.
-        
-        Returns
-        -------
-        images : list<numpy.ndarray OR PIL.Image>
-            A list of images to extract text from.
-
-        Description
-        -----------
-        This function converts an image or PDF file into a list of images. Must return a list because the PDF file
-        could have multiple pages, so the pdf2image conversion function returns a list of images as well. Image files
-        will be converted to a list of one image, unless the image is a TIFF file with multiple frames, in which case 
-        each frame will be in the returned list.
-
-        The images will be returned as numpy.ndarray objects by default. Setting use_PIL_data_type to True will make
-        the images be returned as PIL.Image objects instead.
-
-        NOTE: The numpy images will be using RGB color space, which is not what cv2 uses by default (BGR). If you don't
-        properly use color space flags when using cv2 functions, you will likely have issues.
-        """
-        if file_name.endswith('.pdf'):
-            # Create PIL image List from path/to/pdf. Will grab each page and convert it to be an image in the
-            # returned list. Will return a list regardless of the number of pages.
-            images = convert_from_path(file_name, 300)
-            # Convert the images from PIL to OpenCV for the cleaning function
-            if not use_PIL_data_type:
-                images = [np.array(image.convert('L')) for image in images]
-                    
-        # Check if the file is an image
-        elif file_name.lower().endswith(tuple(self.img_file_type)):
-            if use_PIL_data_type:
-                # Read the image using PIL
-                image = Image.open(file_name).convert('L')
-                images = [image]
-            else:
-                # Read the image using OpenCV
-                image = cv2.imread(file_name, cv2.IMREAD_GRAYSCALE)
-                # This function expects a list of images, so need to convert the image to a list of itself.
-                images = [image]
-        
-        # Handle TIFF files, which may have multiple frames
-        elif file_name.lower().endswith('.tif') or file_name.lower().endswith('.tiff'):
-            # Read the image using PIL
-            image = Image.open(file_name)
-            images = []
-            # Loop through each frame in the TIFF file and convert it to a numpy array
-            for i in range(image.n_frames):
-                image.seek(i)
-                if use_PIL_data_type:
-                    images.append(image.convert('L'))
-                else:
-                    images.append(np.array(image.convert('L')))
-
-        else:
-            print(f"File {file_name} is not a PDF or image file.")
-            return None
-        
-        return images
 
 
     def get_text(self, image, psm=PSM.AUTO):
@@ -158,6 +86,9 @@ class TextExtractor:
         -----------
         This function extracts the text from an image using the tesserocr library. The text is returned as a string.
         """
+        if isinstance(image, Image.Image):
+            image = np.array(image.convert('L'))
+
         self.api.SetPageSegMode(psm)
         
         clean_image = self.clean_image_func(image, **self.clean_image_func_args)
@@ -288,7 +219,7 @@ class TextExtractor:
         outputted (Effectively using system resources to do nothing). This function does not return any data, so it
         cannot be used to store the extracted text in a variable.
         """
-        images = self.convert_file_to_images(file_path)
+        images = utils.convert_file_to_images(file_path)
         if images is None:
             print(f"Could not extract text from {file_path}.")
             return None
@@ -368,7 +299,7 @@ class TextExtractor:
         
         for file_name in input_list:
             # Convert the file to into a list of images (could be multiple pages if PDF)
-            images = self.convert_file_to_images(file_name)
+            images = utils.convert_file_to_images(file_name)
             if images is None:
                 print(f"Could not extract text from {file_name}.")
                 continue
@@ -418,12 +349,16 @@ if __name__ == "__main__":
     group.add_argument('-d', '--directory', help='Path to the directory containing the images or PDFs to extract text from')
     group.add_argument('-f', '--file', help='Path to the image or PDF file')
     parser.add_argument('-o', '--output', help='Path to the directory to save the extracted text files to')
-    parser.add_argument('--print', action='store_true', help='If set, will print the extracted text to the console')
-    parser.add_argument('--get_data', action='store_true', help='If set, will extract word-specific data from the images')
+    parser.add_argument('--print', action='store_true', help='Print the extracted text to the console')
+    parser.add_argument('--get_data', action='store_true', help='Extract word-specific data from the images')
     args = parser.parse_args()
 
+    if not args.output and args.directory:
+        print("No output or print arguments provided. No text will be extracted.")
+        exit(1)
+
     # Print if neither print or output is set
-    print_text = True if not args.output else args.print
+    print_text = True if not args.print and not args.output else args.print
 
     # Import this here because it is the only place it is used
     from ImageProcessor import ImageProcessor

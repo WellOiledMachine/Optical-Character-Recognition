@@ -23,17 +23,14 @@ if __name__ == '__main__':
     # Need to initialize the API in the same thread as the one it will be used in
     with tesserocr.PyTessBaseAPI() as api:
         # Set the debug file to /dev/null to suppress the "Detected X diacritics" messages (and everything else)
-        api.SetVariable("debug_file", "/dev/null")
-        api.SetVariable('tessedit_char_blacklist', '|{}()><\\©')
+        api_vars={'debug_file': '/dev/null', 'tessedit_char_blacklist': '|{}><\\©«+=%[][0-9]»'}
+        for var, val in api_vars.items():
+            api.SetVariable(var, val)
 
-
-        api.SetImageFile(a_path)
-        text = api.GetUTF8Text()
-        print(text)
-        # Initialize the ImageProcessor
+        # # Initialize the ImageProcessor
         clean_image_func = ImageProcessor()
 
-        text_extractor = TextExtractor(api, clean_image_func=clean_image_func)
+        text_extractor = TextExtractor(api, api_vars=api_vars, clean_image_func=clean_image_func)
 
         """1) Let's try just extracting text from all of the files in the list. Can also set get_data=True to get coordinate data.
         You can also specify an output directory to save the extracted .txt files to."""
@@ -45,11 +42,10 @@ if __name__ == '__main__':
         It should be noted that if get_data=True, the returned value will be a list of dictionaries. If you want to print
         the coordinate data, you have to use the print_results=True argument (or figure out how to print it yourself).
         You could also use the convert_coord_data_to_text method in the TextExtractor class."""
-        # UNCOMMENT THE LINE BELOW
+        # UNCOMMENT THE LINES BELOW
 
-        text = text_extractor.extract_from_file(image_path, output_path=None, print_results=False, get_data=False)
-        print(text)
-
+        # text = text_extractor.extract_from_file(image_path, output_path=None, print_results=False, get_data=False)
+        # print(text)
 
         """3) You can also use a custom function to split your image into multiple parts and feed each of them into the
         OCR engine seperatetly. This can improve OCR accuracy for some images."""
@@ -93,3 +89,29 @@ if __name__ == '__main__':
         
         # print(text)        
 
+        """5) You can also try to automatically detect the language using multiple passes. This can be useful if you have
+        different documents with unknown languages. """
+        # UNCOMMENT THE LINES BELOW
+        import re
+
+        pattern=re.compile(r'.*(spanish|german|french|Sample).*')
+        dir = 'test_images'
+        image_paths = ["example-forms/emergency-medical-form.pdf"]
+
+        # # Walk through the directory and get all the images
+        for _, _, files in os.walk(dir):
+            for file in files:
+                if pattern.match(file):
+                    image_paths.append(os.path.join(dir, file))
+        print(image_paths)
+
+        images = utils.convert_pathlist_to_imagelist(image_paths, use_PIL_data_type=True)
+        for image, name in zip(images, image_paths):
+            lang = text_extractor.detect_language_and_extract(image, max_attempts=10)
+            if lang is None:
+                print(f"Could not detect language for {name}")
+                continue
+            text_extractor._re_init_api(lang=lang)
+            text = text_extractor.get_text(image)
+            print("Detected language:", lang)
+            print(f"Detected Text from {name} using {lang}:\n\n", text)

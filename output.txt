@@ -1,0 +1,271 @@
+['test_images/french_questions.png', 'test_images/spanish_ss_1.png', 'test_images/french_reading_comprehension.webp', 'test_images/spanish_website_screenshot.png', 'test_images/german_text_spacing.jpg', 'test_images/SampleText.jpg', 'test_images/spanish_ss_2.png', 'test_images/german_Wikimedia.jpg']
+Language.FRENCH
+Language found in 1 attempt(s).
+Detected language: fra
+Detected Text from test_images/french_questions.png using fra:
+
+ @)
+
+(e)
+
+Répondez par y ou en suivant le cas :
+
+G) Este que tous vos amis sont rentrés de Tokyo hier ?
+Oui,
+
+(Gi)  Voulezvous du sucre dans votre café ? Oui, ……..
+
+(ii) Este que tes parents iront en France la semaine
+prochaine ? Non, …
+
+Gv) Este que beaucoup  d'Indiens mangent du riz?
+Oui, …
+
+() Hier, quand Odette rentrait du marché, atelle trouvé un
+portefeuille ? Non,
+
+Remplissez les tirets avec les pronoms interrogatifs composés :
+
+G) Voilà, deux modèles de voitures très différents,
+préférezvous ?
+
+Gi) Je pense beaucoup à mon examen de français.
+pensezvous ?
+
+Gi) II faut acheter des lunettes de soleil, sans tu
+ne peux pas te promener pendant la journée.
+
+Gv)_ L'élève a répondu à toutes les questions. atil
+répondu ?
+
+()  Estce qu'ils doivent prendre ces parapluies ou les autres ?
+
+Language.SPANISH
+Language found in 1 attempt(s).
+Detected language: spa
+Detected Text from test_images/spanish_ss_1.png using spa:
+
+ Vas a dar una presentación oral a
+tu clase sobre un tema cultural. Vas.
+a tener 4 minutos para leer el tema
+dela presentación y prepararla.
+Después vas a tener 2 minutos para
+grabar tu presentación.
+Entupresentación, compara una.
+Comunidad hispanohablante que te
+sea familiar a tucomunidado a otra
+comunidad. Debes demonstrar tu
+comprensión de aspectos culturales
+en el mundo hispanohablante y
+organizar tu presentación de una
+manera clara.
+
+Language.FRENCH
+Language found in 1 attempt(s).
+Detected language: fra
+Detected Text from test_images/french_reading_comprehension.webp using fra:
+
+ L'élève français, ce cancre en langues
+étrangères
+
+Selon une étude européenne, les Français se
+classent derniers, ou presque.
+
+Dans les enquêtes internationales, les élèves fran
+çais ne sont guère habitués à briller. Une étude
+européenne sur les compétences linguistiques la
+première d’une telle ampleur menée à l'initiative
+de la Commission européenne auprès de 54 OO ly
+céens, dans 14 pays, force encore le trait : les
+Français se classent derniers. ou presque. Se
+lon les résultats rendus publics le 21 juin, ils sont
+seulement 14 # à obtenir un bon niveau dans leur
+première langue étrangère, l'anglais  LV1 , et
+11 X dans la deuxième langue étudiée, l'espa
+gnol x LV2 . Seuls 4 # ont un niveau de base
+leur permettant de saisir le sens d'expressions
+courantes et de phrases isolées. Autrement dit,
+de se faire comprendre.
+
+Maigre consolation : les Anglais font pire — 2 #
+seulement maîtrisent leur  LV1 (le français) et
+6 leur  LV2 (l'allemand). Dans leur grande
+majorité, les Européens n'ont rien de petits
+génies des langues : 42 # sont compétents dans
+leur première langue étrangère, 2 X dans la
+deuxième, pointe l'enquête dirigée par l'université
+de Cambridge.
+
+ Décevant , commente sobrement Neil Jones,
+directeur de projet. Décevant qu'après quatre
+à cinq années d'études, près d'un adolescent
+sur deux en soit encore à chercher ses mots, ou
+presque.
+
+Les bons élèves ? Les Suédois, les Irlandais,
+les Maltais, les Néerlandais. Les moins bons ?
+Après les Britanniques et les Français, les Belges,
+les Polonais, les Espagnols. Petite surprise :
+la Suède se classe nettement en tête pour ce qui
+
+est de la première langue étudiée — avec 82 X
+d'adolescents jugés compétents en anglais ,
+mais arrive dernière quand il s'agit de la deuxième
+langue étrangère, l'espagnol.
+
+Cette étude confirme la persistance des écarts
+de niveaux en Europe note Neil Jones, le facteur
+clé restant la motivation, l'intérêt que revêt
+une langue étrangère. On comprend pourquoi
+les Anglais ne s'ilustrent pas: leur langue
+s'est imposée partout comme une nécessité.
+L'important est de se concentrer sur ce qui
+contribue à un apprentissage réussi.
+
+Sortir de l’académique
+
+Ses préconisations ? Commencer dès le plus
+jeune âge ; une écoute et une pratique hors du
+cadre scolaire — à travers les films, la musique, les
+voyages. L'enseignement doit accorder une
+place plus importante à l'échange, à la commu
+nication, pour ne pas rester académique. Faire
+de l'apprentissage des langues une activité
+familière : c'est ce que recommandait déjà un
+rapport remis à l’ancien ministre de l'éducation,
+Luc Chatel, le 7 février. 1l proposait, entre autres,
+d'xinstaurer une sensibilisation aux langues
+dès la maternelle (...), sans limiter le nombre de
+langues . Ou, “ au collège, de proposer deux
+langues vivantes dès la 6°  — ce qui existe déjà
+pour une poignée d'élèves des sections euro
+péennes ou bilingues.
+
+Pas sûr que la priorité du nouveau locataire
+de la Rue de Grenelle soit cellelà. Même s’il
+ne méconnaît pas l'enjeu: selon une note
+d’information émanant de ses services et publiée
+le mois dernier, moins de la moitié des collégiens
+de 3° ont un niveau satisfaisant en langues. Et la
+tendance n'est pas au progrès.
+
+Le Monde, L'élève français, ce cancre en langues étrangères , Mattea Battaglia, 22 juillet 217.
+
+
+Language.SPANISH
+Language found in 1 attempt(s).
+Detected language: spa
+Detected Text from test_images/spanish_website_screenshot.png using spa:
+
+ La propuesta llegó a Buenos Aires hace poco más de un año: ver una película y
+disfrutar de un menú de tres pasos, recostado en un sillón que nada tiene que
+envidiarles a los asientos de primera clase y con un mozo que está pendiente de
+dos cosas: atender a los comensales sin tapar la pantalla y de que la copa de los
+espectadores esté siempre llena.
+
+Lo cierto es que en las dos salas en las que se brinda este servicio premium en el país
+casi no quedan butacas vacías los fines de semana. Las funciones comienzan alas
+13.3O y se extienden hasta la trasnoche, pasadas las tres. Y cuanto más temprano, más
+posibilidades hay de conseguir un lugar.
+
+La Nación vivió esta experiencia para conocer si de este cóctel que combina alta
+gastronomía con cine resulta un trago de buen sabor para el exigente paladar porteño.
+
+Desde el inicio del paseo, queda en claro que se trata de un servicio premium. No hay
+que hacer filas para sacar las entradas porque las salas cuentan con una boletería y un
+lobby independientes. Hay un menú de invierno, diseñado por el chef de la casa, Martín
+Molteni, que incluye el pase de cine, una entrada, un plato principal, bebida, postre y
+café, por 145 pesos. También se puede pedir el combo de pizza y cerveza, que con la
+entrada vale 7O pesos o cuñas de papa con cerveza más entrada, por $6O.
+
+Conviene llegar unos 2O minutos antes de la función para ubicarse en los livings de la
+recepción y elegir con luz el menú. Allí, el mozo tomará el pedido y consultará en qué
+momento de la película uno quiere que llegue cada paso. Por lo general, los tres pasos
+del menú de Molteni siguen el ritmo de introducción, nudo y desenlace de la película.
+
+Nelson fue el mozo que atendió a esta cronista. El menú elegido fue roll de salmón,
+como entrada, y bondiola a la miel como primer plato, todo acompañado por un
+syrah de una marca líder. La mousse de chocolate se prometió para el momento
+del postre.
+
+Una vez adentro, instruyó acerca del uso del sillón. Un botón permite reclinarlo a
+
+'6O grados y subir el apoyapiés. Otro botón es para llamar al mozo, al estilo de las
+aerolíneas. Los asientos están distribuidos de a dos y hay una mesa pequeña y
+redonda en medio. Según se explicó, la sala fue diseñada con una inclinación tal que
+los mozos no obstruyan la visión mientras sirven. Para lograrlo, se mueven con máxima
+discreción y en ocasiones deben servir los platos de rodillas, a riesgo de ser silbados
+por otros espectadores.
+
+Language.GERMAN
+Language found in 1 attempt(s).
+Detected language: deu
+Detected Text from test_images/german_text_spacing.jpg using deu:
+
+ Be  — „. ., TITTEN.
+und Polarisation des Lichtes in den sogenannten kolloidalen
+
+Metallösungen. Zieht man die Folgerungen aus der elektro
+magnetischen Lichttheorie auf das Verhalten der trüben Medien,
+so kommt man zu verschiedenen Resultaten, je nachdem die
+trübenden Teilchen Isolatoren oder Leiter der Elektrizität sind.
+Die bezüglichen Rechnungen sind durchgeführt worden von
+Lord Rayleigh') für Isolatoren und von J. J. Thomson?) für
+Leiter der Elektrizität. Dabei machen beide die Annahme,
+daß die kleinen Teilchen Kugeln mit gegen die Lichtwellen
+länge kleinem Durchmesser sind. Beide Autoren behandeln das
+Problem der Zerstreuung des Lichtes durch eine solche kleine
+Kugel, wenn diese von einer Welle natürlichen Lichtes ge
+troffen wird. Während nun die Rechnung ergab, daß das von
+einer isolierenden Kugel in einer Ebene senkrecht zum ein
+fallenden Strahl zerstreute Licht vollkommen linear polarisiert
+ist, und zwar in der durch die betrachtete Zerstreuungsriehtung
+
+Language.ENGLISH
+Language found in 1 attempt(s).
+Detected language: eng
+Detected Text from test_images/SampleText.jpg using eng:
+
+ Here is some example text to perform OCR on.
+Notice how this text is rotated slightly.
+The quick brown fox jumps over the lazy dog.
+¢ This texts smaller
+
+e This text is bigger
+
+Language.SPANISH
+Language found in 1 attempt(s).
+Detected language: spa
+Detected Text from test_images/spanish_ss_2.png using spa:
+
+ ¿Cómo afecta el diseño de una ciudad (por ejemplo, sus mercados, parques
+y calles) a la vida social de las personas en una comunidad del mundo
+hispanohablante que te sea familiar? Compara el efecto del diseño de una
+ciudad en una región del mundo hispanohablante que te sea familiar con el
+efecto del diseño en tu comunidad o en otra comunidad. En tu presentación,
+puedes referirte a lo que has estudiado, vivido, observado, etc
+
+Language.GERMAN
+Language found in 1 attempt(s).
+Detected language: deu
+Detected Text from test_images/german_Wikimedia.jpg using deu:
+
+ das HammerAmboßgelenk. Hermann macht hiergegen geltend,
+daß eine Unsymmetrie in den Schwingungsamplituden des
+Trommelfelles oder des HammerAmboßgelenkes erst bei sehr
+großen Amplituden eintreten könnte, während man die Kom
+binationstöne doch auch bei sehr geringer Intensität der Primär.
+töne vorzüglich höre; ferner höre man Kombinationstöne auch
+dann, wenn beide Ohren fest mit Watte verstopft sind, obwohl
+hierdurch gerade das Trommelfell in seinen Schwingungen
+stark behindert würde. Preyer!) gibt allerdings an, daß bei
+zugestopften Ohren Kombinationstöne nicht zu hören seien.
+Jedoch konnte ich sie in den meisten Fällen auch vorzüglich
+hören. Sie schienen mir beim Zustopfen der Ohren um so
+mehr geschwächt zu werden, je höher die Primärtöne sind.
+In einigen Fällen konnte ich hier Kombinationstöne überhaupt
+nicht hören, obwohl sie, wenn die Ohren nicht verstopft waren,
+ganz besonders stark zu hören waren. Vielleicht ist die sonst
+kaum verständliche Angabe Preyers damit zu erklären, daß
+er sehr hohe Primärtöne zu seinen Versuchen gewählt hat.
+

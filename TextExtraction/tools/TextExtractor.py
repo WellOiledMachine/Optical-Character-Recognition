@@ -9,7 +9,13 @@ from pdf2image import convert_from_path
 import time
 import numpy as np
 import os
-import utils
+import sys
+from lingua import LanguageDetectorBuilder
+
+
+# Add the parent directory to the sys.path so that the tools module can be imported
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from tools import utils
 
 class TextExtractor:
     """This class is used to extract text from images and PDFs using the tesserocr library. The class provides 
@@ -19,7 +25,9 @@ class TextExtractor:
     attached."""
     def __init__(
             self,
-            api, 
+            api,
+            api_vars={},
+            allow_newlines=False,
             seg_func=None, 
             seg_func_args={}, 
             clean_image_func=None,
@@ -51,6 +59,8 @@ class TextExtractor:
         """
 
         self.api = api
+        self.api_vars = api_vars
+        self.allow_newlines = allow_newlines
         self.seg_func = seg_func
         self.seg_func_args = seg_func_args
         self.clean_image_func = clean_image_func
@@ -99,12 +109,15 @@ class TextExtractor:
         for segment in segments:
             image = Image.fromarray(segment) if not isinstance(segment, Image.Image) else segment
             self.api.SetImage(image)
+
             text += self.api.GetUTF8Text()
 
+        if not self.allow_newlines:
+            text = text.replace('\n', ' ')
         return text
 
 
-    def get_coordinate_data(self, image, psm=PSM.AUTO):
+    def _get_coordinate_data(self, image, psm=PSM.AUTO):
         """
         Parameters
         ----------
@@ -154,7 +167,7 @@ class TextExtractor:
         return data
 
 
-    def convert_coord_data_to_text(self, data):
+    def _convert_coord_data_to_text(self, data):
         """
         Parameters
         ----------
@@ -228,7 +241,7 @@ class TextExtractor:
             # Extract text or data from the image
             if get_data:
                 # Extract the text and coordinate data from the image
-                data = self.get_coordinate_data(image, psm)
+                data = self._get_coordinate_data(image, psm)
                 if output_path or print_results:
                     # Convert the returned data to text, and add a header to the text
                     text = 'left\ttop\tright\tbottom\tconf\ttext\n' + self.convert_coord_data_to_text(data)
@@ -309,7 +322,7 @@ class TextExtractor:
                 # Extract text or data from the image
                 if get_data:
                     # Extract the text and coordinate data from the image
-                    data = self.get_coordinate_data(image, psm)
+                    data = self._get_coordinate_data(image, psm)
                     # Convert the returned data to text, and add a header to the text
                     text = 'left\ttop\tright\tbottom\tconf\ttext\n' + self.convert_coord_data_to_text(data)
                 else:
@@ -340,6 +353,84 @@ class TextExtractor:
 
         print(f"Time taken: {time.time() - start_time:.2f} seconds")
 
+    def detect_language_and_extract(self, image, max_attempts=5):
+        """
+        Parameters
+        ----------
+        image : PIL.Image
+            The image to detect the language of. Must be a PIL.Image object.
+        max_attempts : int, optional
+            The maximum number of attempts to detect the language of the image. The default is 5.
+
+        Returns
+        -------
+        final_choice : str
+            The detected language of the image. The language is returned as an ISO 639-2 code. If the language is not
+            supported by tesseract, then None will be returned.
+        
+        Description
+        -----------
+        This function detects the language of an image using the tesserocr and lingua libraries. The function will
+        attempt to detect the language of the with several passes, where each time tesseract will be reinitialized
+        with the previously detected language. Since this will run (and reinitialize) tesseract multiple times, the
+        number of attempts is limited to the max_attempts parameter.
+        """
+        supported_languages = set(tesserocr.get_languages()[1])
+        detector = LanguageDetectorBuilder.from_all_languages().build()
+        
+        detected_langs=[]
+        detected_lang='eng' # Default to English.
+        final_choice = ''
+        iteration_count = 0
+
+        while detected_lang not in detected_langs and iteration_count < max_attempts:
+            iteration_count += 1
+            self._re_init_api(lang=detected_lang)
+            text = self.get_text(image)
+            
+            # Tesseract uses ISO 639-2 codes to select languages, so that is what we will use
+            detected_lang = detector.detect_language_of(text)
+            print(detected_lang)
+            if detected_lang is None:
+                return None
+            
+            detected_lang=detected_lang.iso_code_639_3.name.lower()
+            
+            if detected_lang in supported_languages:
+                detected_langs.append(detected_lang)
+                final_choice = detected_lang
+            else:
+                if not detected_lang:
+                    print("No language was detected.")
+                else:
+                    print(f"{detected_lang} was detected, but is not supported. \
+                          If this is a mistake, please provide the correct language code, \
+                          provided that it is supported by tesseract.")
+                return None
+        print(f"Language found in {iteration_count} attempt(s).")
+        return final_choice
+    
+    def _re_init_api(self, lang='eng'):
+        """
+        Parameters
+        ----------
+        lang : str, optional
+            The language to reinitialize the tesseract API with. The default is 'eng' (English).
+
+        Returns
+        -------
+        None
+
+        Description
+        -----------
+        This function reinitializes the tesseract API with a new language. This is useful if you want to change the
+        language that tesseract is using to extract text from the images. This function will reinitialize the API with
+        the new language, and also set the blacklist and debug file each time.
+        """
+        self.api.Init(lang=lang)
+        for var, value in self.api_vars.items():
+            self.api.SetVariable(var, value)
+            
 
 if __name__ == "__main__":
     from argparse import ArgumentParser
@@ -357,7 +448,7 @@ if __name__ == "__main__":
         print("No output or print arguments provided. No text will be extracted.")
         exit(1)
 
-    # Print if neither print or output is set
+    # If neither the print or output arguments are set, then make sure to print the text to the console
     print_text = True if not args.print and not args.output else args.print
 
     # Import this here because it is the only place it is used

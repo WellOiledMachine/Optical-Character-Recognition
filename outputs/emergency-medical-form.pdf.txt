@@ -1,0 +1,109 @@
+Emergency Medical Form
+
+Personal Information
+Preferred Name Patient Identifier  If known
+
+John 00000001
+
+Date of Birth
+
+01.01.1990
+
+City
+
+Sample City
+Preferred Phone Number
+
+555-5555
+
+Emergency Contact
+Relationship Contact Number
+
+Wife 444-4444
+
+Relationship
+
+First Name Last Name
+
+John
+
+Gender Marital Status
+
+Married
+
+Preferred Pronouns
+
+He/Him
+
+if
+Oo
+
+li
+
+Address
+
+123 Sample Street
+
+Email
+johndoe@email.com
+
+top]
+2
+=I
+oy
+
+AZ
+
+Full Name
+Jane Doe
+
+Full Name
+
+James Doe
+
+Contact Number
+
+333-3333
+
+i
+e]
+=
+
+Medical Information
+Address
+
+456 Example Street
+
+Contact Number
+
+123-4567
+
+Primary Care Physician
+
+Dr. Smith
+
+Please list any medical conditions
+Asthma
+
+Please list any current medication
+
+N/A
+
+Please list any allergies
+Pollen
+
+Additional Information
+Suffered asthmatic attack during hike.
+
+Emergency Medical Consent
+
+j, John Doe consent to Example Hospital authorizing medical care for
+
+myself in the event of an emergency.
+
+Parent or Guardian Name If Applicable Relationship to Patient If Applicable
+Signature of Patient, Parent or Guardian Date
+- LJoe 6/1/2024
+
+http://Carepatron.com Powered by @ carepatron
+

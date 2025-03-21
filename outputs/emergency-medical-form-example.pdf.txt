@@ -1,0 +1,58 @@
+Emergency Medical Form
+
+First Name Last Name Preferred Name Patient Identifier [If known
+Alexander Sample Alex ABC123
+
+Gender Preferred Pronouns Date of Birth Marital Status
+
+He/Him 09.15.1994 Married
+Address
+
+123 Sample Street Sample City /AZ
+
+Email Preferred Phone Number
+
+alex.sample@example.co 555-5555
+
+Full Name Relationship Contact Number
+
+Alice Sample Wife 555-5555
+
+Full Name Relationship Contact Number
+Drew Example Brother in law 555-5555
+Medical Information
+
+Primary Care Physician Address Contact Number
+
+Dr White 123 Sample Terrace 555-5555
+
+Please list any medical conditions
+
+Narcolepsy Type 1
+
+Please list any current medication
+Sodium oxybate ‘Xyrem twice at night time
+
+Please list any allergies
+Bee stings- anaphylaxis
+
+Other: Latex, Lactose, Penicillin
+
+Additional Information
+Epi-pen is in the front pocket of my bag in case of anaphylactic shock
+
+My narcoleptic episodes cataplexy can look like a seizure but 1 am conscious and in no
+immediate danger.
+
+Emergency Medical Consent
+
+, Alex Sample , consent to Summer Camp Inc. authorizing medical care for
+
+myself in the event of an emergency.
+
+Parent or Guardian Name If Applicable Relationship to Patient If Applicable
+Signature of i, nt, Parent or Guggdian Date
+. 12/21/2022
+
+http://Carepatron.com Powered by r carepatron
+

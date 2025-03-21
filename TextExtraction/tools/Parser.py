@@ -3,151 +3,185 @@ import re
 import utils
 from ImageProcessor import ImageProcessor
 from TextExtractor import TextExtractor
-
-class text_parser_args:
-    def __init__(self):
-        self.simple_patterns = {}
-        self.coord_specific_patterns = {}
-
-    def add_simple_pattern(self, name, pattern, match_group=0):
-        # TODO: Add a check to make sure the same name isn't being used twice
-        # Or maybe dont. It will just overwrite the old pattern
-        self.simple_patterns[name] = (pattern, match_group)
-
-    def add_coord_specific_pattern(self, name, coordinates, pattern, match_group=0):
-        """
-        Parameters
-        ----------
-        name : str
-            The name of the pattern to be matched.
-        coordinates : list or tuple
-            A list of length 4 that represents the coordinates of the area in the image to search for the pattern.
-            The list should be in the form (x1, y1, x2, y2), where x1, y1 is the top left corner and x2, y2 is the
-            bottom right corner of the area.
-        pattern : str
-            The regular expression pattern to search for in the specified area.
-        match_group : int, optional
-            The index of the match group to return. The default is 0, which returns the entire match.
-            
-        Description
-        -----------
-        Adds a pattern that is specific to a certain area of the image. This will allow you to use the coordinates in the 
-        coordinates tuple to crop the image, extract text from the cropped image, and then search for the pattern in that
-        extracted text."""
-        if name in self.coord_specific_patterns:
-            print(f'Warning: pattern already exists with name {name}. Overwriting...')
-        
-        if not isinstance(coordinates, tuple):
-            if len(coordinates) != 4:
-                raise ValueError('coordinates list must have a length of 4')
-            
-            try:
-                coordinates = tuple(coordinates)
-            except:
-                raise ValueError('coordinates must be a tuple or a list')
-        self.coord_specific_patterns[name] = (coordinates, pattern, match_group)
-
-    def add_complex_pattern(self, name, search_pattern, not_pattern, match_pattern, match_group=0):
-        pass
-        
-
 from ImageCropper import ImageCropper
 
-def extract_and_parse(text_extractor, parser_args, images):
-    if not isinstance(text_extractor, TextExtractor):
-        raise TypeError('text_extractor must be an instance of the TextExtractor class')
-    
-    parsed_text = '' # Initialize the parsed text string
 
-    coord_patterns = parser_args.coord_specific_patterns
-    # Initialize Cropper outside of loop if a cropper is needed
-    if len(coord_patterns) != 0:
-        # Create an image cropper that will use all of the coordinate information to crop images
-        cropper = ImageCropper()
+class Pattern:
+    def __init__(
+            self,
+            name: str = None,
+            coordinates: tuple[int,int,int,int] = None,
+            search_pattern: str = None,
+            search_group: int = 0,
+            not_pattern: str = None,
+            match_pattern: str = None,
+            match_group = 0
+    ):
+        self.name = name
+        self.coordinates = coordinates
+        self.search_pattern = search_pattern
+        self.search_group = search_group
+        self.not_pattern = not_pattern
+        self.match_pattern = match_pattern
+        self.match_group = match_group
+
+    def __repr__(self):
+        return f'Pattern(name={self.name}, coordinates={self.coordinates}, search_pattern={self.search_pattern}, search_group={self.search_group}, not_pattern={self.not_pattern}, match_pattern={self.match_pattern}, match_group={self.match_group})'
+
+    def __str__(self) -> str:
+        return self.__repr__()
+    
+    def is_coordinate_specific(self):
+        return self.coordinates is not None
+
+
+class Parser:
+    def __init__(self):
+        self.paragraph_format=True
+        self.patterns: list[Pattern] = []
+        self.parsed_fields: dict[str, str] = {}
+        self.includes_coordinates = False
+    
+    def add_pattern(self, pattern: Pattern):
+        """
+        Patterns are added to the parser. If a pattern with the same name already exists, it will be overwritten.
+        """
+        for index, existing_pattern in enumerate(self.patterns):
+            if existing_pattern.name == pattern.name:
+                print(f"A pattern with the name '{pattern.name}' already exists. Overwriting...")
+                self.patterns[index] = pattern
+                return
         
-        # Add all of the coordinate sets to the cropper
-        for name, (coordinates, pattern, match_group) in coord_patterns.items():
-            cropper.add_segment(coordinates)
+        # No duplicates. Add the pattern to the list
+        self.patterns.append(pattern)
+        self.check_for_coordinates() # Update the coordinate flag
     
+    def clear_patterns(self):
+        self.patterns = []
+    
+    def check_for_coordinates(self):
+        """
+        Make sure the parser knows if there are any coordinate specific patterns
+        Since the possibility exists that the only pattern with coordinates in a given parser
+        could be overwritten so that it no longer has coordinates, we need to check all patterns
+        every time a new pattern is added. 
 
+        Returns:
+            bool: True if the parser includes coordinate specific patterns, False
+                otherwise
+        """
+        self.includes_coordinates = False
+        for pttrn in self.patterns:
+            if pttrn.is_coordinate_specific():
+                self.includes_coordinates = True
+                break
+    
+    def has_coordinate_patterns(self):
+        self.check_for_coordinates()
+        return self.includes_coordinates
+
+    def get_coordinate_set(self):
+        return set([pattern.coordinates for pattern in self.patterns if pattern.is_coordinate_specific()])
+        
+    def parse(self, text:str, pattern: Pattern):
+        if not pattern.match_pattern:
+            print(f'No match pattern provided for field {pattern.name}. Skipping...')
+            return
+        if pattern.search_pattern:
+            # Search for the search pattern and extract the group
+            # This is the string that will be searched for the match pattern
+            match = re.search(pattern.search_pattern, text)
+            if match:
+                text = match.group(pattern.search_group)
+        elif pattern.not_pattern:
+            # If there is a not pattern, check if the text matches the not pattern
+            # This means we have a false match, and should skip this field
+            match = re.search(pattern.not_pattern, text)
+            if match:
+                return
+        
+        # Finally, search for the match pattern
+        match = re.search(pattern.match_pattern, text)
+        if match:
+            self.parsed_fields[pattern.name] = match.group(pattern.match_group)
+    
+    def get_parsed_fields(self):
+        return self.parsed_fields
+    
+    def clear_parsed_fields(self):
+        self.parsed_fields = {}
+    
+    def get_parsed_text(self):
+        if self.paragraph_format:
+            return '\n'.join(f"{key}: {value}" for key, value in self.parsed_fields.items())
+        return ' '.join(f"{key}: {value}" for key, value in self.parsed_fields.items())
+
+def extract_and_parse_file(file: str, text_extractor: TextExtractor, parser: Parser):
+    # If the allow_newlines flag is set to False, then that means the text will be parsed as a single paragraph
+    parser.paragraph_format = not text_extractor.allow_newlines
+    
+    # Get image(s) from the file path
+    images = utils.convert_file_to_images(file, use_PIL_data_type=True)
+
+    cropped_image_texts = {} # Used for memoization: store cropped image texts to avoid reprocessing duplicate coordinates
+
+    # Check if any crops are needed
+    if parser.has_coordinate_patterns():
+        coordinates = parser.get_coordinate_set() # Get unique set of coordinates from parser
+        cropper = ImageCropper() # Initialize the cropper
+        cropper.add_multiple_segments(coordinates) # Add the coordinates to the cropper
+        # cropper is now ready to have images passed to it to crop them according to the coordinates.
+
+
+    # Loop through the images (might only be 1) and extract the text
     for image in images:
-        # Check if there are any simple patterns to match
-        if len(parser_args.simple_patterns) != 0:
+        # Original text for patterns that are not coordinate specific
+        full_text = text_extractor.get_text(image)
+        # Get dictionary of cropped images mapped to their coordinates
+        cropped_images = cropper.crop(image)
+        # Get dictionary of cropped image texts mapped to their coordinates
+        cropped_image_texts = {coordinates: text_extractor.get_text(cropped_images[coordinates]) for coordinates in cropped_images}
+        for pattern in parser.patterns:
+            if pattern.is_coordinate_specific():
+                text = cropped_image_texts[pattern.coordinates]
+                # else:
+                    # cropped_image_texts[pattern.coordinates] = text # Store the cropped text for future reference
 
-            # Use normal text extraction to get the text from the file
-            input_text = text_extractor.get_text(image)
-            parsed_text += '########## SIMPLE PATTERN MATCHES ##########\n'
-            
-            # Loop through the simple patterns and try to find a match in the input text
-            for name, (pattern, match_group) in parser_args.simple_patterns.items():
-                match = re.search(pattern, input_text, re.DOTALL | re.MULTILINE)
-                if match:
-                    parsed_text += f'{name}: {match.group(match_group)}\n'
-                else:
-                    parsed_text += f'{name}: PATTERN NOT FOUND\n'
+                parser.parse(text, pattern) # Parse the coordinate specific text for the specific pattern
+            else: # Parse the general text for the specific pattern
+                parser.parse(full_text, pattern)
+
+    return parser.get_parsed_text()
         
-        # Check if there are any coordinate specific patterns to match
-        if len(coord_patterns) != 0:
-            # Use the cropper to get the cropped images
-            crops = cropper(image)
 
-
-            # import matplotlib.pyplot as plt
-# 
-            # for value in crops.values():
-                # plt.imshow(value, cmap='gray')
-                # plt.show()
-
-            # Join the cropped images with the coord_patterns to create a dictionary of coordinates
-            # for keys that map to the cropped images and the pattern list to use in parsing
-            joined_dict = {}
-            for name, (coordinates, pattern, match_group) in coord_patterns.items():
-                if coordinates in crops:
-                    joined_dict[name] = (crops[coordinates], pattern, match_group)
-            
-            # Loop through the joined dictionary and extract text from the cropped images
-            # Then search for the patterns in the extracted text
-            parsed_text += '########## COORDINATE SPECIFIC PATTERN MATCHES ##########\n'
-            for name, (crop, pattern, match_group) in joined_dict.items():
-                extracted_text = text_extractor.get_text(crop)
-                print(extracted_text)
-                match = re.search(pattern, extracted_text, re.DOTALL | re.MULTILINE)
-                if match:
-                    parsed_text += f'{name}: {match.group(match_group)}\n'
-                else:
-                    parsed_text += f'{name}: PATTERN NOT FOUND\n'
-        
-    return parsed_text
-        
 
 
 if __name__ == '__main__':
     # Create file path to the example form
     file_loc = os.path.abspath(__file__)
     root_dir = os.path.dirname(os.path.dirname(os.path.dirname(file_loc)))
-    pdf_path = os.path.join(root_dir, 'example-forms', 'emergency-medical-form.pdf')
+    pdf_path = os.path.join(root_dir, 'example-forms',
+                            'emergency-medical-form.pdf')
 
-    images = utils.convert_file_to_images(pdf_path, use_PIL_data_type=True)
-    
     bbox = (310, 335, 790, 565)
 
-    parser_args = text_parser_args()
-    parser_args.add_simple_pattern('hehe Words', r'example')
-    parser_args.add_coord_specific_pattern('Name', bbox, r'(First)(.*)', 2)
-    # parser_args.add_coord_specific_pattern('Name', (100, 100, 200, 200), r'Name: (.+)')
+    parser = Parser()
+    parser.add_pattern(
+        Pattern(
+            name = 'First Name', 
+            coordinates=bbox,
+            match_pattern=r'(First)(.*)', 
+            match_group=2
+        )
+    )
 
-
-    # text = "For example, blah blah blah"
-    
-    # match = re.search(r'example', text)
-    # print(match.group())
-    clean_image_func = ImageProcessor(deskew=True, global_binarize=True )
+    clean_image_func = ImageProcessor(deskew=True, global_binarize=True)
 
     from tesserocr import PyTessBaseAPI
 
     with PyTessBaseAPI() as api:
         text_extractor = TextExtractor(api, clean_image_func=clean_image_func)
-        text = extract_and_parse(text_extractor, parser_args, images)
+        text = extract_and_parse_file(pdf_path, text_extractor, parser)
         print(text)
-  
+
         # text_extractor.get_text(images[0])
